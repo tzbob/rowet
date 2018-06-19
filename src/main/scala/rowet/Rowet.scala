@@ -34,10 +34,23 @@ class Rowet[F[_]: Monad](p: Platform[F]) {
 //    println(s"ClassName: $className, Title: $title")
   }
 
+  val test = {
+    val validWindows = (Window.windows, Window.validate).mapN { (ws, p) =>
+      ws.filter(p)
+    }
+
+    for {
+      windows    <- validWindows
+      classNames <- windows.map(_.title).sequence
+    } yield {
+      println(classNames.mkString("\nClassName:"))
+    }
+  }
+
 }
 
 object Rowet extends Rowet[IO](rowet.windows.WinApi) {
   def main(args: Array[String]): Unit = {
-    printAllWindows.unsafeRunSync()
+    test.unsafeRunSync()
   }
 }

@@ -5,6 +5,7 @@ trait Window[F[_]] {
   val className: F[String]
 }
 
-trait WindowCompanion[F[_]] {
-  val windows: F[List[Window[F]]]
+trait WindowCompanion[W <: Window[F], F[_]] {
+  val windows: F[List[W]]
+  val validate: F[W => Boolean]
 }
