@@ -1,10 +1,10 @@
 package rowet
 
-trait Monitor[F[_]] {
-  val windows: F[List[Window[F]]]
-  val geometry: F[Geometry]
-}
+trait Monitor
 
-trait MonitorCompanion[F[_]] {
-  val monitors: F[List[Monitor[F]]]
+trait MonitorCompanion[W <: Window, M <: Monitor, F[_]] {
+  val monitors: F[List[M]]
+
+  val windows: F[M => List[W]]
+  val geometry: F[M => Geometry]
 }

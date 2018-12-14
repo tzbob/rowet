@@ -5,25 +5,12 @@ import com.sun.jna.{Native, Pointer}
 import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
-import rowet.WindowCompanion
+import rowet.windows.Desktop32.HDWP
+import rowet.{Geometry, WindowCompanion}
 
 import scala.collection.mutable.ListBuffer
 
-case class Window(private[windows] val hWND: HWND) extends rowet.Window[IO] {
-
-  override val title: IO[String] = IO {
-    val chars = new Array[Char](1024)
-    User32.INSTANCE.GetWindowText(hWND, chars, chars.length)
-    Native.toString(chars)
-  }
-
-  override val className: IO[String] = IO {
-    val chars = new Array[Char](1024)
-    User32.INSTANCE.GetClassName(hWND, chars, chars.length)
-    Native.toString(chars)
-  }
-
-}
+case class Window(private[windows] val hWND: HWND) extends rowet.Window
 
 object Window extends WindowCompanion[Window, IO] {
 
@@ -84,4 +71,40 @@ object Window extends WindowCompanion[Window, IO] {
 
     (visible && isRootWindow) && ((!isToolWindow && !hasOwner) || isAppWindow && hasOwner) && !isNativeWindowsFrame && hasTitle
   }
+
+  override val move: IO[Map[Window, Geometry] => Unit] = IO { windows =>
+    val hDWP = Desktop32.INSTANCE.BeginDeferWindowPos(windows.size)
+
+    def deferWindow(w: Window, geometry: Geometry, posInfo: HDWP): HDWP =
+      Desktop32.INSTANCE.DeferWindowPos(
+        posInfo,
+        w.hWND,
+        null,
+        geometry.x,
+        geometry.y,
+        geometry.width,
+        geometry.height,
+        Desktop32.SWP_NOZORDER
+      )
+
+    val finalHDWP = windows.foldLeft(hDWP) {
+      case (hDWPNext, (w, g)) =>
+        deferWindow(w, g, hDWPNext)
+    }
+
+    Desktop32.INSTANCE.EndDeferWindowPos(finalHDWP)
+  }
+
+  override val title: IO[Window => String] = IO { w =>
+    val chars = new Array[Char](1024)
+    User32.INSTANCE.GetWindowText(w.hWND, chars, chars.length)
+    Native.toString(chars)
+  }
+
+  override val className: IO[Window => String] = IO { w =>
+    val chars = new Array[Char](1024)
+    User32.INSTANCE.GetClassName(w.hWND, chars, chars.length)
+    Native.toString(chars)
+  }
+
 }

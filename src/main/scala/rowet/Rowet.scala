@@ -15,35 +15,30 @@ class Rowet[F[_]: Monad](p: Platform[F]) {
 //    }
 //  }
 
-  val printAllWindows = for {
-    monitors          <- Monitor.monitors
-    monitorWindowList <- monitors.map(m => m.windows.map(_ -> m)).sequence
-  } yield {
-    for {
-      (windows, monitor) <- monitorWindowList
-    } {
-      println(s"$monitor has $windows")
-    }
-  }
-
-  val printAllWindowsEz = for {
-    windows    <- Window.windows
-    classNames <- windows.map(_.className).sequence
-  } yield {
-    println(classNames.mkString("\nClassName:"))
+//  val printAllWindowsEz = for {
+//    windows    <- Window.windows
+//    classNames <- windows.map(_.className).sequence
+//  } yield {
+//    println(classNames.mkString("\nClassName:"))
 //    println(s"ClassName: $className, Title: $title")
-  }
+//  }
 
   val test = {
-    val validWindows = (Window.windows, Window.validate).mapN { (ws, p) =>
-      ws.filter(p)
+    val targetWs = (Window.windows , Window.validate, Window.title).mapN { (ws, p, t) =>
+      val validWs = ws.filter(p)
+      val result = validWs.filter(w => t(w).contains("Bitt") || t(w).contains("Spot"))
+      println(result.map(t))
+      result
     }
 
-    for {
-      windows    <- validWindows
-      classNames <- windows.map(_.title).sequence
-    } yield {
-      println(classNames.mkString("\nClassName:"))
+    (targetWs, Window.move).mapN { (ws, move) =>
+      println(ws)
+      val movements = Map (
+        ws(0) -> Geometry(0, 0, 500, 500),
+        ws(1) -> Geometry(600, 600, 500, 500)
+      )
+
+      move(movements)
     }
   }
 

@@ -7,26 +7,29 @@ import rowet.{Geometry, MonitorCompanion}
 
 import scala.collection.mutable.ListBuffer
 
-case class Monitor(private[windows] val hMonitor: HMONITOR, private[windows] val geometry0: Geometry)
-    extends rowet.Monitor[IO] {
-  override val windows: IO[List[Window]] = for {
-    windows <- Window.windows
-  } yield {
-    windows.filter { window =>
-      hMonitor == User32.INSTANCE
-        .MonitorFromWindow(window.hWND, WinUser.MONITOR_DEFAULTTONEAREST)
-    }
-  }
+case class Monitor(private[windows] val hMonitor: HMONITOR,
+                   private[windows] val geometry0: Geometry)
+    extends rowet.Monitor
 
-  override val geometry: IO[Geometry] = IO.pure(geometry0)
-}
-
-object Monitor extends MonitorCompanion[IO] {
-  override val monitors: IO[List[rowet.Monitor[IO]]] = IO {
+object Monitor extends MonitorCompanion[Window, Monitor, IO] {
+  override val monitors: IO[List[Monitor]] = IO {
     val callback = new MonitorEnumeratorCallback
     User32.INSTANCE.EnumDisplayMonitors(null, null, callback, null)
     callback.monitors()
   }
+
+  override val windows: IO[Monitor => List[Window]] = for {
+    windows <- Window.windows
+  } yield { m: Monitor =>
+    {
+      windows.filter { window =>
+        m.hMonitor == User32.INSTANCE
+          .MonitorFromWindow(window.hWND, WinUser.MONITOR_DEFAULTTONEAREST)
+      }
+    }
+  }
+
+  override val geometry: IO[Monitor => Geometry] = IO.pure(w => w.geometry0)
 
   class MonitorEnumeratorCallback extends MONITORENUMPROC {
     private[this] val monitorBuffer = ListBuffer.empty[Monitor]
