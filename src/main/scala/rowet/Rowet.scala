@@ -1,18 +1,16 @@
 package rowet
 
-import cats.FlatMap
 import cats._
-import cats.data._
 import cats.effect.IO
 import cats.implicits._
+import rowet.internal.{Geometry, Platform}
 
 class Rowet[F[_]: Monad](p: Platform[F]) {
   import p._
 
-//  Monitor.monitors.map { monitors =>
-//    monitors.map { monitor =>
-//      monitor.windows.map(ws => monitor -> ws)
-//    }
+//  val printMons = (Monitor.monitors, Monitor.geometry).mapN { (monitors, g) =>
+//    val gs = monitors.map(g)
+//    gs.foreach(println)
 //  }
 
 //  val printAllWindowsEz = for {
@@ -44,7 +42,7 @@ class Rowet[F[_]: Monad](p: Platform[F]) {
 
 }
 
-object Rowet extends Rowet[IO](rowet.windows.WinApi) {
+object Rowet extends Rowet[IO](rowet.internal.windows.WinApi) {
   def main(args: Array[String]): Unit = {
     test.unsafeRunSync()
   }

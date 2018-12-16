@@ -24,10 +24,13 @@ name := "rowet"
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % "1.0.1",
-  "org.typelevel" %% "cats-effect" % "0.9",
-  "biz.enef" %% "slogging" % "0.5.3",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "net.java.dev.jna" % "jna" % "4.5.1",
+//  "be.tzbob"         %% "hokko"       % "0.4.9-SNAPSHOT",
+  "org.typelevel"    %% "cats-core"   % "1.0.1",
+  "org.typelevel"    %% "cats-effect" % "0.9",
+  "eu.timepit"       %% "refined"     % "0.9.3",
+  "biz.enef"         %% "slogging"    % "0.5.3",
+  "org.scalatest"    %% "scalatest"   % "3.0.1" % "test",
+  
+  "net.java.dev.jna" % "jna"          % "4.5.1",
   "net.java.dev.jna" % "jna-platform" % "4.5.1"
 )

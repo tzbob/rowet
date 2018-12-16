@@ -1,16 +1,16 @@
-package rowet.windows
+package rowet.internal.windows
 
 import cats.effect.IO
 import com.sun.jna.{Native, Pointer}
 import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
-import rowet.windows.Desktop32.HDWP
-import rowet.{Geometry, WindowCompanion}
+import rowet.internal.{Geometry, WindowCompanion}
+import rowet.internal.windows.Desktop32.HDWP
 
 import scala.collection.mutable.ListBuffer
 
-case class Window(private[windows] val hWND: HWND) extends rowet.Window
+case class Window(private[windows] val hWND: HWND) extends rowet.internal.Window
 
 object Window extends WindowCompanion[Window, IO] {
 

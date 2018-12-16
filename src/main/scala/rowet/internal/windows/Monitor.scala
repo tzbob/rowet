@@ -1,15 +1,15 @@
-package rowet.windows
+package rowet.internal.windows
 
 import cats.effect.IO
-import com.sun.jna.platform.win32.{User32, WinDef, WinUser}
 import com.sun.jna.platform.win32.WinUser.{HMONITOR, MONITORENUMPROC}
-import rowet.{Geometry, MonitorCompanion}
+import com.sun.jna.platform.win32.{User32, WinDef, WinUser}
+import rowet.internal.{Geometry, MonitorCompanion}
 
 import scala.collection.mutable.ListBuffer
 
 case class Monitor(private[windows] val hMonitor: HMONITOR,
-                   private[windows] val geometry0: Geometry)
-    extends rowet.Monitor
+                   val geometry: Geometry)
+    extends rowet.internal.Monitor
 
 object Monitor extends MonitorCompanion[Window, Monitor, IO] {
   override val monitors: IO[List[Monitor]] = IO {
@@ -28,8 +28,6 @@ object Monitor extends MonitorCompanion[Window, Monitor, IO] {
       }
     }
   }
-
-  override val geometry: IO[Monitor => Geometry] = IO.pure(w => w.geometry0)
 
   class MonitorEnumeratorCallback extends MONITORENUMPROC {
     private[this] val monitorBuffer = ListBuffer.empty[Monitor]

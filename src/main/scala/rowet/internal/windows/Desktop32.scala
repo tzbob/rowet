@@ -1,11 +1,11 @@
-package rowet.windows
+package rowet.internal.windows
 
 import com.sun.jna.platform.win32.WTypes.LPSTR
 import com.sun.jna.platform.win32.WinDef.{HWND, LPARAM, UINT}
 import com.sun.jna.platform.win32.WinNT.HANDLE
 import com.sun.jna.win32.{StdCallLibrary, W32APIOptions}
-import com.sun.jna.{Callback, Native, Pointer}
-import rowet.windows.Desktop32.{DESKTOPENUMPROC, HDWP}
+import com.sun.jna.{Callback, Native}
+import rowet.internal.windows.Desktop32.{DESKTOPENUMPROC, HDWP}
 
 trait Desktop32 extends StdCallLibrary {
   def EnumDesktops(hwinsta: HANDLE,
