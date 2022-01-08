@@ -13,18 +13,16 @@ import scala.collection.mutable.ListBuffer
 
 case class Window(private[windows] val hWND: HWND) extends rowet.internal.Window
 
-object Window extends WindowCompanion[Window, IO] {
+object Window extends WindowCompanion[Window, IO]:
   override val windows: IO[List[Window]] = IO {
-    class WindowEnumeratorCallback extends WNDENUMPROC {
+    class WindowEnumeratorCallback extends WNDENUMPROC:
       private[this] val windowHandlers = ListBuffer.empty[Window]
 
-      override def callback(hWnd: HWND, data: Pointer): Boolean = {
+      override def callback(hWnd: HWND, data: Pointer): Boolean =
         windowHandlers += new Window(hWnd)
         true
-      }
 
       def windows(): List[Window] = windowHandlers.toList
-    }
 
     val windowCallback = new WindowEnumeratorCallback
     User32.INSTANCE.EnumWindows(windowCallback, null)
@@ -40,28 +38,25 @@ object Window extends WindowCompanion[Window, IO] {
     val extendedWindowStyles =
       User32.INSTANCE.GetWindowLong(hWND, WinUser.GWL_EXSTYLE)
 
-    val className = {
+    val className =
       val chars = new Array[Char](1024)
       User32.INSTANCE.GetClassName(hWND, chars, chars.length)
       Native.toString(chars)
-    }
 
-    val windowText = {
+    val windowText =
       val chars = new Array[Char](1024)
       User32.INSTANCE.GetWindowText(hWND, chars, chars.length)
       Native.toString(chars)
-    }
 
     val hasTitle = windowText != ""
 
-    val isNativeWindowsFrame = (windowText, className) match {
+    val isNativeWindowsFrame = (windowText, className) match
       case ("Settings", "Windows.UI.Core.CoreWindow")        => true
       case ("Settings", "ApplicationFrameWindow")            => true
       case ("Microsoft Store", "Windows.UI.Core.CoreWindow") => true
       case ("Microsoft Store", "ApplicationFrameWindow")     => true
       case ("Program Manager", "Progman")                    => true
       case _                                                 => false
-    }
 
     val isToolWindow = (extendedWindowStyles & Desktop32.WS_EX_TOOLWINDOW) == 1
     val hasOwner = Desktop32.INSTANCE
@@ -110,4 +105,3 @@ object Window extends WindowCompanion[Window, IO] {
 
     Desktop32.INSTANCE.EndDeferWindowPos(finalHDWP)
   }
-}

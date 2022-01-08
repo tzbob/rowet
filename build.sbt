@@ -8,7 +8,10 @@ scalacOptions ++= Seq(
   "UTF-8",
   "-feature",
   "-deprecation",
-  "-language:higherKinds"
+  "-language:higherKinds",
+  "-Ykind-projector",
+  "-new-syntax",
+  "-indent"
 )
 
 name := "rowet"

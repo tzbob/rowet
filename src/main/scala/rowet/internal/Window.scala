@@ -2,7 +2,7 @@ package rowet.internal
 
 trait Window
 
-trait WindowCompanion[W <: Window, F[_]] {
+trait WindowCompanion[W <: Window, F[_]]:
   val windows: F[List[W]]
 
   def validate(window: W): F[Boolean]
@@ -19,4 +19,3 @@ trait WindowCompanion[W <: Window, F[_]] {
     */
   def place(placements: Map[W, Placement]): F[Unit] =
     move(placements.view.mapValues(_.geometry.absolute).toMap)
-}

@@ -1,5 +1,4 @@
 package rowet.internal.windows
 
-object Implicits {
+object Implicits:
   implicit val platform: WinApi.type = WinApi
-}

@@ -7,7 +7,7 @@ import com.sun.jna.win32.{StdCallLibrary, W32APIOptions}
 import com.sun.jna.{Callback, Native}
 import rowet.internal.windows.Desktop32.{DESKTOPENUMPROC, HDWP}
 
-trait Desktop32 extends StdCallLibrary {
+trait Desktop32 extends StdCallLibrary:
   def EnumDesktops(hwinsta: HANDLE,
                    lpfn: DESKTOPENUMPROC,
                    lParam: LPARAM): Boolean
@@ -39,9 +39,8 @@ trait Desktop32 extends StdCallLibrary {
                      uFlags: UINT): HDWP
 
   def EndDeferWindowPos(hWinPosInfo: HDWP): Boolean
-}
 
-object Desktop32 {
+object Desktop32:
   val INSTANCE: Desktop32 = Native
     .loadLibrary("user32", classOf[Desktop32], W32APIOptions.DEFAULT_OPTIONS)
     .asInstanceOf[Desktop32]
@@ -51,9 +50,7 @@ object Desktop32 {
   val GW_OWNER         = 4
   val SWP_NOZORDER     = new UINT(0x0004)
 
-  trait DESKTOPENUMPROC extends Callback {
+  trait DESKTOPENUMPROC extends Callback:
     def callback(lpszDesktop: LPSTR, lParam: LPARAM): Boolean
-  }
 
   type HDWP = HWND
-}
