@@ -11,9 +11,9 @@ trait WindowCompanion[W <: Window, F[_]]:
 
   /** Raw move command, uses absolute coordinates
     */
-  def move(locations: Map[W, Geometry]): F[Unit]
+  def move(locations: Map[W, Rectangle]): F[Unit]
 
   /** Monitor specific move command, uses coordinates relative to monitors
     */
   def place(placements: Map[W, Placement]): F[Unit] =
-    move(placements.view.mapValues(_.geometry.absolute).toMap)
+    move(placements.view.mapValues(_.rectangle.absolute).toMap)

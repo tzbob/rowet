@@ -1,8 +1,8 @@
 package rowet.internal
 
 trait Monitor:
-  val geometry: Geometry
-  def place(geometry: Geometry): Placement = Placement.on(this, geometry)
+  val rectangle: Rectangle
+  def place(rectangle: Rectangle): Placement = Placement.on(this, rectangle)
 
 trait MonitorCompanion[W <: Window, M <: Monitor, F[_]]:
   val monitors: F[List[M]]

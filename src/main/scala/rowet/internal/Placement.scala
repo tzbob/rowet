@@ -2,13 +2,13 @@ package rowet.internal
 
 trait Placement:
   val monitor: Monitor
-  val geometry: monitor.geometry.SubGeometry
+  val rectangle: monitor.rectangle.SubRectangle
 
-  override def toString: String = geometry.absolute.toString
+  override def toString: String = rectangle.absolute.toString
 
 object Placement:
-  def on(m: Monitor, g: Geometry): Placement = new Placement {
+  def on(m: Monitor, g: Rectangle): Placement = new Placement {
     override val monitor: Monitor = m
-    override val geometry: monitor.geometry.SubGeometry =
-      monitor.geometry.SubGeometry(g)
+    override val rectangle: monitor.rectangle.SubRectangle =
+      monitor.rectangle.SubRectangle(g)
   }

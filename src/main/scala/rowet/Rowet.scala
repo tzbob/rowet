@@ -3,15 +3,15 @@ package rowet
 import cats._
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
-import rowet.internal.{Geometry, Placement, Platform}
+import rowet.internal.{Rectangle, Placement, Platform}
 
 class Rowet[F[_]: Sync](val p: Platform[F]):
   import p._
 
   def sideToSide[A](windows: List[A], monitor: Monitor) =
-    val width = monitor.geometry.width / windows.size
+    val width = monitor.rectangle.width / windows.size
     windows.zipWithIndex.foldLeft(Map.empty[A, Placement]) { case (placements, (window, idx)) =>
-      val placement = monitor.place(Geometry(idx * width, 0, width, monitor.geometry.height))
+      val placement = monitor.place(Rectangle(idx * width, 0, width, monitor.rectangle.height))
       placements + (window -> placement)
     }
 

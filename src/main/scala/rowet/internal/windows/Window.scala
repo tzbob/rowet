@@ -7,7 +7,7 @@ import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.{Native, Pointer}
 import rowet.internal
 import rowet.internal.windows.Desktop32.HDWP
-import rowet.internal.{Geometry, Placement, WindowCompanion}
+import rowet.internal.{Rectangle, Placement, WindowCompanion}
 
 import scala.collection.mutable.ListBuffer
 import scala.language.unsafeNulls
@@ -15,7 +15,7 @@ import scala.language.unsafeNulls
 case class Window(private[windows] val hWND: HWND) extends rowet.internal.Window
 
 object Window extends WindowCompanion[Window, IO]:
-  override val windows: IO[List[Window]] = IO {
+  override val windows: IO[List[Window]] = {
     class WindowEnumeratorCallback extends WNDENUMPROC:
       private[this] val windowHandlers = ListBuffer.empty[Window]
 
@@ -26,11 +26,13 @@ object Window extends WindowCompanion[Window, IO]:
       def windows(): List[Window] = windowHandlers.toList
 
     val windowCallback = new WindowEnumeratorCallback
-    User32.INSTANCE.EnumWindows(windowCallback, null)
-    windowCallback.windows()
+    IO.blocking {
+      User32.INSTANCE.EnumWindows(windowCallback, null)
+      windowCallback.windows()
+    }
   }
 
-  override def validate(w: Window): IO[Boolean] = IO {
+  override def validate(w: Window): IO[Boolean] = IO.delay {
     val hWND = w.hWND
 
     val visible      = User32.INSTANCE.IsWindowVisible(hWND)
@@ -69,32 +71,34 @@ object Window extends WindowCompanion[Window, IO]:
   }
 
   override def title(window: Window): IO[String] =
-    IO {
+    IO.delay {
       val chars = new Array[Char](1024)
       User32.INSTANCE.GetWindowText(window.hWND, chars, chars.length)
       Native.toString(chars)
     }
 
-  override def className(window: Window): IO[String] = IO {
+  override def className(window: Window): IO[String] = {
     val chars = new Array[Char](1024)
-    User32.INSTANCE.GetClassName(window.hWND, chars, chars.length)
-    Native.toString(chars)
+    IO.delay {
+      User32.INSTANCE.GetClassName(window.hWND, chars, chars.length)
+      Native.toString(chars)
+    }
   }
 
   /** Raw move command, uses absolute coordinates
     */
-  override def move(locations: Map[Window, Geometry]): IO[Unit] = IO {
+  override def move(locations: Map[Window, Rectangle]): IO[Unit] = IO.blocking {
     val hDWP = Desktop32.INSTANCE.BeginDeferWindowPos(locations.size)
 
-    def deferWindow(w: Window, geometry: Geometry, posInfo: HDWP): HDWP =
+    def deferWindow(w: Window, rectangle: Rectangle, posInfo: HDWP): HDWP =
       Desktop32.INSTANCE.DeferWindowPos(
         posInfo,
         w.hWND,
         null,
-        geometry.x,
-        geometry.y,
-        geometry.width,
-        geometry.height,
+        rectangle.x,
+        rectangle.y,
+        rectangle.width,
+        rectangle.height,
         Desktop32.SWP_NOZORDER
       )
 
