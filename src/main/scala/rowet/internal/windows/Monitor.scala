@@ -7,8 +7,7 @@ import rowet.internal.{Geometry, MonitorCompanion}
 
 import scala.collection.mutable.ListBuffer
 
-case class Monitor(private[windows] val hMonitor: HMONITOR,
-                   val geometry: Geometry)
+case class Monitor(private[windows] val hMonitor: HMONITOR, geometry: Geometry)
     extends rowet.internal.Monitor
 
 object Monitor extends MonitorCompanion[Window, Monitor, IO] {
@@ -18,16 +17,15 @@ object Monitor extends MonitorCompanion[Window, Monitor, IO] {
     callback.monitors()
   }
 
-  override val windows: IO[Monitor => List[Window]] = for {
-    windows <- Window.windows
-  } yield { m: Monitor =>
-    {
+  override def windows(monitor: Monitor): IO[List[Window]] =
+    for {
+      windows <- Window.windows
+    } yield {
       windows.filter { window =>
-        m.hMonitor == User32.INSTANCE
+        monitor.hMonitor == User32.INSTANCE
           .MonitorFromWindow(window.hWND, WinUser.MONITOR_DEFAULTTONEAREST)
       }
     }
-  }
 
   class MonitorEnumeratorCallback extends MONITORENUMPROC {
     private[this] val monitorBuffer = ListBuffer.empty[Monitor]
@@ -38,7 +36,7 @@ object Monitor extends MonitorCompanion[Window, Monitor, IO] {
       val rec = lprcMonitor.toRectangle
       monitorBuffer += new Monitor(
         hMonitor,
-        Geometry(rec.x, rec.y, rec.height, rec.width))
+        Geometry(rec.x, rec.y, rec.width, rec.height))
       1
     }
     def monitors(): List[Monitor] = monitorBuffer.toList

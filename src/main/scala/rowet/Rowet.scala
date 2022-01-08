@@ -1,49 +1,47 @@
 package rowet
 
 import cats._
-import cats.effect.IO
+import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
-import rowet.internal.{Geometry, Platform}
+import rowet.internal.{Geometry, Placement, Platform}
 
-class Rowet[F[_]: Monad](p: Platform[F]) {
+class Rowet[F[_]: Sync](val p: Platform[F]) {
   import p._
 
-//  val printMons = (Monitor.monitors, Monitor.geometry).mapN { (monitors, g) =>
-//    val gs = monitors.map(g)
-//    gs.foreach(println)
-//  }
-
-//  val printAllWindowsEz = for {
-//    windows    <- Window.windows
-//    classNames <- windows.map(_.className).sequence
-//  } yield {
-//    println(classNames.mkString("\nClassName:"))
-//    println(s"ClassName: $className, Title: $title")
-//  }
+  def sideToSide[A](windows: List[A], monitor: Monitor) = {
+    val width = monitor.geometry.width / windows.size
+    windows.zipWithIndex.foldLeft(Map.empty[A, Placement]) {
+      case (placements, (window, idx)) =>
+        val placement = monitor.place(
+          Geometry(idx * width, 0, width, monitor.geometry.height))
+        placements + (window -> placement)
+    }
+  }
 
   val test = {
-    val targetWs = (Window.windows , Window.validate, Window.title).mapN { (ws, p, t) =>
-      val validWs = ws.filter(p)
-      val result = validWs.filter(w => t(w).contains("Bitt") || t(w).contains("Spot"))
-      println(result.map(t))
-      result
-    }
+    def findTaiga(windows: List[p.Window], titles: List[String]) =
+      windows.zip(titles).collect {
+        case (window, title)
+            if title.contains("Taiga") || title.contains("Steam") =>
+          window
+      }
 
-    (targetWs, Window.move).mapN { (ws, move) =>
-      println(ws)
-      val movements = Map (
-        ws(0) -> Geometry(0, 0, 500, 500),
-        ws(1) -> Geometry(600, 600, 500, 500)
-      )
-
-      move(movements)
+    for {
+      allWindows <- Window.windows
+      windows    <- allWindows.filterA(Window.validate)
+      titles     <- windows.traverse(Window.title)
+      monitor    <- Monitor.monitors
+      taigas     = findTaiga(windows, titles)
+      placements = sideToSide(taigas, monitor(0))
+      _ <- Window.place(placements)
+    } yield {
+      println(s"Moved $taigas on $placements")
     }
   }
 
 }
 
-object Rowet extends Rowet[IO](rowet.internal.windows.WinApi) {
-  def main(args: Array[String]): Unit = {
-    test.unsafeRunSync()
-  }
+object Rowet extends Rowet[IO](rowet.internal.windows.WinApi) with IOApp {
+  override def run(args: List[String]): IO[ExitCode] =
+    test.onError(e => IO(println(e))).as(ExitCode.Success)
 }
