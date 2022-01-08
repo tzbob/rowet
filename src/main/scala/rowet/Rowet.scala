@@ -10,18 +10,15 @@ class Rowet[F[_]: Sync](val p: Platform[F]):
 
   def sideToSide[A](windows: List[A], monitor: Monitor) =
     val width = monitor.geometry.width / windows.size
-    windows.zipWithIndex.foldLeft(Map.empty[A, Placement]) {
-      case (placements, (window, idx)) =>
-        val placement = monitor.place(
-          Geometry(idx * width, 0, width, monitor.geometry.height))
-        placements + (window -> placement)
+    windows.zipWithIndex.foldLeft(Map.empty[A, Placement]) { case (placements, (window, idx)) =>
+      val placement = monitor.place(Geometry(idx * width, 0, width, monitor.geometry.height))
+      placements + (window -> placement)
     }
 
   val test =
     def findTaiga(windows: List[p.Window], titles: List[String]) =
       windows.zip(titles).collect {
-        case (window, title)
-            if title.contains("Taiga") || title.contains("Steam") =>
+        case (window, title) if title.contains("Taiga") || title.contains("Steam") =>
           window
       }
 
@@ -33,9 +30,7 @@ class Rowet[F[_]: Sync](val p: Platform[F]):
       taigas     = findTaiga(windows, titles)
       placements = sideToSide(taigas, monitor(0))
       _ <- Window.place(placements)
-    yield
-      println(s"Moved $taigas on $placements")
-
+    yield println(s"Moved $taigas on $placements")
 
 object Rowet extends Rowet[IO](rowet.internal.windows.WinApi) with IOApp:
   override def run(args: List[String]): IO[ExitCode] =

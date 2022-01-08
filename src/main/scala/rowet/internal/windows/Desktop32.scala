@@ -8,17 +8,14 @@ import com.sun.jna.{Callback, Native}
 import rowet.internal.windows.Desktop32.{DESKTOPENUMPROC, HDWP}
 
 trait Desktop32 extends StdCallLibrary:
-  def EnumDesktops(hwinsta: HANDLE,
-                   lpfn: DESKTOPENUMPROC,
-                   lParam: LPARAM): Boolean
+  def EnumDesktops(hwinsta: HANDLE, lpfn: DESKTOPENUMPROC, lParam: LPARAM): Boolean
 
   def GetParent(hWND: HWND): HWND
   def GetWindow(hWND: HWND, cmd: Int): HWND
   def IsHungAppWindow(hWND: HWND): Boolean
   def BeginDeferWindowPos(nNumWindows: Int): HDWP
 
-  /**
-    * https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-deferwindowpos
+  /** https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-deferwindowpos
     * @param hWinPosInfo
     * @param hWnd
     * @param hWndInsertAfter
@@ -29,14 +26,16 @@ trait Desktop32 extends StdCallLibrary:
     * @param uFlags
     * @return
     */
-  def DeferWindowPos(hWinPosInfo: HDWP,
-                     hWnd: HWND,
-                     hWndInsertAfter: HWND,
-                     x: Int,
-                     y: Int,
-                     cx: Int,
-                     cy: Int,
-                     uFlags: UINT): HDWP
+  def DeferWindowPos(
+      hWinPosInfo: HDWP,
+      hWnd: HWND,
+      hWndInsertAfter: HWND,
+      x: Int,
+      y: Int,
+      cx: Int,
+      cy: Int,
+      uFlags: UINT
+  ): HDWP
 
   def EndDeferWindowPos(hWinPosInfo: HDWP): Boolean
 

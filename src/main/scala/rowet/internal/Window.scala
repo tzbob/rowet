@@ -9,13 +9,11 @@ trait WindowCompanion[W <: Window, F[_]]:
   def title(window: W): F[String]
   def className(window: W): F[String]
 
-  /**
-    * Raw move command, uses absolute coordinates
+  /** Raw move command, uses absolute coordinates
     */
   def move(locations: Map[W, Geometry]): F[Unit]
 
-  /**
-    * Monitor specific move command, uses coordinates relative to monitors
+  /** Monitor specific move command, uses coordinates relative to monitors
     */
   def place(placements: Map[W, Placement]): F[Unit] =
     move(placements.view.mapValues(_.geometry.absolute).toMap)

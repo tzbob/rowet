@@ -80,8 +80,7 @@ object Window extends WindowCompanion[Window, IO]:
     Native.toString(chars)
   }
 
-  /**
-    * Raw move command, uses absolute coordinates
+  /** Raw move command, uses absolute coordinates
     */
   override def move(locations: Map[Window, Geometry]): IO[Unit] = IO {
     val hDWP = Desktop32.INSTANCE.BeginDeferWindowPos(locations.size)
@@ -98,9 +97,8 @@ object Window extends WindowCompanion[Window, IO]:
         Desktop32.SWP_NOZORDER
       )
 
-    val finalHDWP = locations.foldLeft(hDWP) {
-      case (hDWPNext, (w, g)) =>
-        deferWindow(w, g, hDWPNext)
+    val finalHDWP = locations.foldLeft(hDWP) { case (hDWPNext, (w, g)) =>
+      deferWindow(w, g, hDWPNext)
     }
 
     Desktop32.INSTANCE.EndDeferWindowPos(finalHDWP)
