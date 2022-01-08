@@ -11,7 +11,8 @@ scalacOptions ++= Seq(
   "-language:higherKinds",
   "-Ykind-projector",
   "-new-syntax",
-  "-indent"
+  "-indent",
+  "-Yexplicit-nulls"
 )
 
 name := "rowet"

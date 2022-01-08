@@ -6,6 +6,7 @@ import com.sun.jna.platform.win32.{User32, WinDef, WinUser}
 import rowet.internal.{Geometry, MonitorCompanion}
 
 import scala.collection.mutable.ListBuffer
+import scala.language.unsafeNulls
 
 case class Monitor(private[windows] val hMonitor: HMONITOR, geometry: Geometry) extends rowet.internal.Monitor
 
