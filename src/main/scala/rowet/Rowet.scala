@@ -33,6 +33,6 @@ class Rowet[F[_]: Monad](val p: Platform[F]):
       _ <- Window.place(placements)
     yield println(s"Moved $taigas on $placements")
 
-object Rowet extends Rowet[IO](rowet.internal.windows.WinApi) with IOApp:
+object Rowet extends Rowet[IO](rowet.internal.windows.Windows) with IOApp:
   override def run(args: List[String]): IO[ExitCode] =
     test.onError(e => IO(println(e))).as(ExitCode.Success)

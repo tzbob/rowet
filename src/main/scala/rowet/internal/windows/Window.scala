@@ -6,8 +6,8 @@ import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
 import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.{Native, Pointer}
 import rowet.internal
-import rowet.internal.windows.Desktop32.HDWP
-import rowet.internal.{Rectangle, Placement, WindowCompanion}
+import rowet.internal.windows.WinApi.desktop32.HDWP
+import rowet.internal.{Placement, Rectangle, WindowCompanion}
 
 import scala.collection.mutable.ListBuffer
 import scala.language.unsafeNulls
@@ -35,8 +35,8 @@ object Window extends WindowCompanion[Window, IO]:
   override def validate(w: Window): IO[Boolean] = IO.delay {
     val hWND = w.hWND
 
-    val visible      = User32.INSTANCE.IsWindowVisible(hWND)
-    val isRootWindow = Desktop32.INSTANCE.GetParent(hWND) == null
+    val visible      = WinApi.IsWindowVisible(hWND)
+    val isRootWindow = WinApi.GetParent(hWND) == null
 
     val extendedWindowStyles =
       User32.INSTANCE.GetWindowLong(hWND, WinUser.GWL_EXSTYLE)
@@ -61,11 +61,10 @@ object Window extends WindowCompanion[Window, IO]:
       case ("Program Manager", "Progman")                    => true
       case _                                                 => false
 
-    val isToolWindow = (extendedWindowStyles & Desktop32.WS_EX_TOOLWINDOW) == 1
-    val hasOwner = Desktop32.INSTANCE
-      .GetWindow(hWND, Desktop32.GW_OWNER) != null
+    val isToolWindow = (extendedWindowStyles & WinApi.WS_EX_TOOLWINDOW) == 1
+    val hasOwner     = WinApi.GetWindow(hWND, WinApi.GW_OWNER) != null
 
-    val isAppWindow = (extendedWindowStyles & Desktop32.WS_EX_APPWINDOW) == 1
+    val isAppWindow = (extendedWindowStyles & WinApi.WS_EX_APPWINDOW) == 1
 
     (visible && isRootWindow) && ((!isToolWindow && !hasOwner) || isAppWindow && hasOwner) && !isNativeWindowsFrame && hasTitle
   }
@@ -88,10 +87,10 @@ object Window extends WindowCompanion[Window, IO]:
   /** Raw move command, uses absolute coordinates
     */
   override def move(locations: Map[Window, Rectangle]): IO[Unit] = IO.blocking {
-    val hDWP = Desktop32.INSTANCE.BeginDeferWindowPos(locations.size)
+    val hDWP = WinApi.BeginDeferWindowPos(locations.size)
 
     def deferWindow(w: Window, rectangle: Rectangle, posInfo: HDWP): HDWP =
-      Desktop32.INSTANCE.DeferWindowPos(
+      WinApi.DeferWindowPos(
         posInfo,
         w.hWND,
         null,
@@ -99,12 +98,12 @@ object Window extends WindowCompanion[Window, IO]:
         rectangle.y,
         rectangle.width,
         rectangle.height,
-        Desktop32.SWP_NOZORDER
+        WinApi.SWP_NOZORDER
       )
 
     val finalHDWP = locations.foldLeft(hDWP) { case (hDWPNext, (w, g)) =>
       deferWindow(w, g, hDWPNext)
     }
 
-    Desktop32.INSTANCE.EndDeferWindowPos(finalHDWP)
+    WinApi.EndDeferWindowPos(finalHDWP)
   }

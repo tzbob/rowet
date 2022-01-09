@@ -1,16 +1,10 @@
 package rowet.internal.windows
 
-import cats.effect.IO
-import rowet.internal.Platform
+import com.sun.jna.platform.win32.User32
 
-object WinApi extends Platform[IO]:
+object WinApi:
+  val desktop32: User32Ext = User32Ext.INSTANCE.nn
+  val user32: User32       = User32.INSTANCE.nn
 
-  override type Window          = rowet.internal.windows.Window
-  override type WindowCompanion = rowet.internal.windows.Window.type
-
-  override val Window = rowet.internal.windows.Window
-
-  override type Monitor          = rowet.internal.windows.Monitor
-  override type MonitorCompanion = rowet.internal.windows.Monitor.type
-
-  override val Monitor = rowet.internal.windows.Monitor
+  export desktop32.*
+  export user32.*
