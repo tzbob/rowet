@@ -12,7 +12,8 @@ scalacOptions ++= Seq(
   "-Ykind-projector",
   "-new-syntax",
   "-indent",
-  "-Yexplicit-nulls"
+  "-Yexplicit-nulls",
+  "-Ysafe-init"
 )
 
 name := "rowet"
@@ -21,7 +22,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 libraryDependencies ++= Seq(
   "org.typelevel"   %% "cats-effect"  % "3.3.3",
-  "net.java.dev.jna" % "jna"          % "4.5.1",
-  "net.java.dev.jna" % "jna-platform" % "4.5.1",
+  "net.java.dev.jna" % "jna"          % "5.10.0",
+  "net.java.dev.jna" % "jna-platform" % "5.10.0",
   "org.scalatest"   %% "scalatest"    % "3.2.10" % "test"
 )

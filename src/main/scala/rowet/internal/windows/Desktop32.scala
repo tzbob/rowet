@@ -40,9 +40,9 @@ trait Desktop32 extends StdCallLibrary:
   def EndDeferWindowPos(hWinPosInfo: HDWP): Boolean
 
 object Desktop32:
-  val INSTANCE: Desktop32 = Native
-    .loadLibrary("user32", classOf[Desktop32], W32APIOptions.DEFAULT_OPTIONS)
-    .asInstanceOf[Desktop32]
+  lazy val INSTANCE: Desktop32 = Native
+    .load("user32", classOf[Desktop32], W32APIOptions.DEFAULT_OPTIONS)
+    .nn
 
   val WS_EX_TOOLWINDOW = 0x00000080L
   val WS_EX_APPWINDOW  = 0x00040000L

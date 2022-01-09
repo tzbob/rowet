@@ -1,12 +1,13 @@
 package rowet
 
-import cats._
+import cats.*
+import cats.data.*
 import cats.effect.{ExitCode, IO, IOApp, Sync}
-import cats.implicits._
-import rowet.internal.{Rectangle, Placement, Platform}
+import cats.implicits.*
+import rowet.internal.{Placement, Platform, Rectangle}
 
-class Rowet[F[_]: Sync](val p: Platform[F]):
-  import p._
+class Rowet[F[_]: Monad](val p: Platform[F]):
+  import p.*
 
   def sideToSide[A](windows: List[A], monitor: Monitor) =
     val width = monitor.rectangle.width / windows.size
@@ -16,7 +17,7 @@ class Rowet[F[_]: Sync](val p: Platform[F]):
     }
 
   val test =
-    def findTaiga(windows: List[p.Window], titles: List[String]) =
+    def findTaiga(windows: List[Window], titles: List[String]) =
       windows.zip(titles).collect {
         case (window, title) if title.contains("Taiga") || title.contains("Steam") =>
           window
