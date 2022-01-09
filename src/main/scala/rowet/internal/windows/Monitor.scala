@@ -26,7 +26,7 @@ object Monitor extends MonitorCompanion[Window, Monitor, IO]:
       def monitors(): List[Monitor] = monitorBuffer.toList
     val callback = new MonitorEnumeratorCallback
     IO.blocking {
-      User32.INSTANCE.EnumDisplayMonitors(null, null, callback, null)
+      WinApi.api.EnumDisplayMonitors(null, null, callback, null)
       callback.monitors()
     }
   }
@@ -34,5 +34,5 @@ object Monitor extends MonitorCompanion[Window, Monitor, IO]:
   override def windows(monitor: Monitor): IO[List[Window]] =
     for windows <- Window.windows
     yield windows.filter { window =>
-      monitor.hMonitor == User32.INSTANCE.MonitorFromWindow(window.hWND, WinUser.MONITOR_DEFAULTTONEAREST)
+      monitor.hMonitor == WinApi.api.MonitorFromWindow(window.hWND, WinUser.MONITOR_DEFAULTTONEAREST)
     }

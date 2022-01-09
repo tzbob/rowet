@@ -27,11 +27,11 @@ class Rowet[F[_]: Monad](val p: Platform[F]):
       allWindows <- Window.windows
       windows    <- allWindows.filterA(Window.validate)
       titles     <- windows.traverse(Window.title)
-      monitor    <- Monitor.monitors
-      taigas     = findTaiga(windows, titles)
-      placements = sideToSide(taigas, monitor(0))
-      _ <- Window.place(placements)
-    yield println(s"Moved $taigas on $placements")
+//      monitor    <- Monitor.monitors
+//      taigas     = findTaiga(windows, titles)
+//      placements = sideToSide(taigas, monitor(0))
+//      _ <- Window.place(placements)
+    yield println(s"Found ${titles.length} these: ${titles.zip(windows)}")
 
 object Rowet extends Rowet[IO](rowet.internal.windows.Windows) with IOApp:
   override def run(args: List[String]): IO[ExitCode] =
