@@ -1,4 +1,4 @@
-package rowet.internal
+package rowet.domain
 
 trait Placement:
   val monitor: Monitor

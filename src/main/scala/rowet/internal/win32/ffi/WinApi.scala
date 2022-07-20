@@ -1,12 +1,13 @@
-package rowet.internal.windows
+package rowet.internal.win32.ffi
 
 import com.sun.jna.platform.win32.BaseTSD.{DWORD_PTR, LONG_PTR}
 import com.sun.jna.platform.win32.WTypes.LPSTR
-import com.sun.jna.platform.win32.WinDef.{DWORD, HWND, LPARAM, PVOID, UINT}
+import com.sun.jna.platform.win32.WinDef.*
 import com.sun.jna.platform.win32.WinNT.{HANDLE, HRESULT}
+import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.win32.{StdCallLibrary, W32APIOptions}
 import com.sun.jna.{Callback, Native}
-import com.sun.jna.platform.win32.{User32, WinUser}
+import rowet.internal.win32.ffi.WinApi
 
 trait WinApi extends User32:
   type HDWP = HWND

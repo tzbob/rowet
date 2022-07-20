@@ -1,26 +1,30 @@
-package rowet.internal.windows
+package rowet.internal.win32
 
-import cats.effect.IO
+import cats.effect.{IO, Sync}
+import cats.implicits.*
 import com.sun.jna.platform.win32.BaseTSD.{DWORD_PTR, LONG_PTR}
 import com.sun.jna.platform.win32.WinDef.{DWORD, HWND, PVOID, RECT}
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC
 import com.sun.jna.platform.win32.{User32, WinUser}
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.{Native, Pointer}
+import rowet.domain.{Placement, Rectangle}
 import rowet.internal
-import rowet.internal.windows.DwmApi.*
-import rowet.internal.windows.DwmApi.api.*
-import rowet.internal.windows.WinApi.*
-import rowet.internal.windows.WinApi.api.*
-import rowet.internal.{Placement, Rectangle, WindowCompanion}
+import rowet.internal.WindowAlg
+import rowet.internal.win32.WindowAlgWin32.Window
+import rowet.internal.win32.ffi.DwmApi.*
+import rowet.internal.win32.ffi.DwmApi.api.*
+import rowet.internal.win32.ffi.WinApi.*
+import rowet.internal.win32.ffi.WinApi.api.*
 
 import scala.collection.mutable.ListBuffer
 import scala.language.unsafeNulls
 
-case class Window(private[windows] val hWND: HWND) extends rowet.internal.Window
+object WindowAlgWin32:
+  case class Window(private[win32] val hWND: HWND) extends rowet.domain.Window
 
-object Window extends WindowCompanion[Window, IO]:
-  override val windows: IO[List[Window]] = {
+class WindowAlgWin32[F[_]](implicit F: Sync[F]) extends WindowAlg[Window, F]:
+  override val windows: F[List[Window]] = {
     class WindowEnumeratorCallback extends WNDENUMPROC:
       private[this] val windowHandlers = ListBuffer.empty[Window]
 
@@ -31,7 +35,7 @@ object Window extends WindowCompanion[Window, IO]:
       def windows(): List[Window] = windowHandlers.toList
 
     val windowCallback = new WindowEnumeratorCallback
-    IO.blocking {
+    F.blocking {
       EnumWindows(windowCallback, null)
       windowCallback.windows()
     }
@@ -41,7 +45,7 @@ object Window extends WindowCompanion[Window, IO]:
     * @param w
     * @return
     */
-  override def validate(w: Window): IO[Boolean] = IO.delay {
+  override def validate(w: Window): F[Boolean] = F.delay {
     val hWND = w.hWND
 
     val isAncestor = GetAncestor(hWND, GA_ROOT) == hWND
@@ -96,16 +100,16 @@ object Window extends WindowCompanion[Window, IO]:
     !isCloaked && isAncestor && visible && validStyle && validStyle && validExStyle && !isSystem && !hasVisibleOwner
   }
 
-  override def title(window: Window): IO[String] =
-    IO.delay {
+  override def title(window: Window): F[String] =
+    F.delay {
       val chars = new Array[Char](1024)
       GetWindowText(window.hWND, chars, chars.length)
       Native.toString(chars)
     }
 
-  override def className(window: Window): IO[String] = {
+  override def className(window: Window): F[String] = {
     val chars = new Array[Char](1024)
-    IO.delay {
+    F.delay {
       GetClassName(window.hWND, chars, chars.length)
       Native.toString(chars)
     }
@@ -113,7 +117,7 @@ object Window extends WindowCompanion[Window, IO]:
 
   /** Raw move command, uses absolute coordinates
     */
-  override def move(locations: Map[Window, Rectangle]): IO[Unit] = IO.blocking {
+  override def move(locations: Map[Window, Rectangle]): F[Unit] = F.blocking {
     val hDWP = BeginDeferWindowPos(locations.size)
 
     def deferWindow(w: Window, rectangle: Rectangle, posInfo: HDWP): HDWP =

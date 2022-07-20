@@ -1,8 +1,8 @@
 package rowet.internal
 
-trait Window
+import rowet.domain.*
 
-trait WindowCompanion[W <: Window, F[_]]:
+trait WindowAlg[W <: Window, F[_]]:
   val windows: F[List[W]]
 
   def validate(window: W): F[Boolean]

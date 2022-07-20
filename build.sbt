@@ -1,5 +1,5 @@
 organization := "be.tzbob"
-scalaVersion := "3.1.0"
+scalaVersion := "3.1.3"
 version      := "0.0.1-SNAPSHOT"
 name         := "rowet"
 
